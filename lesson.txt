@@ -1,0 +1,14 @@
+Terminal
+cd /
+mkdir react-shop
+cd react-shop
+code .
+
+VS CODE
+mkdir backend
+mkdir frontend
+cd backend
+
+install packages
+npm init -y
+npm i bcrypt cookie-parser crypto dotenv express jsonwebtoken mongoose validator
