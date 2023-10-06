@@ -13,7 +13,7 @@ exports.registerUser = async (req, res, next) => {
             public_id: 'avatars/hsdfl66pg2mpvp5irfqy',
             url: 'https://res.cloudinary.com/dgneiaky7/image/upload/v1680144230/avatars/hsdfl66pg2mpvp5irfqy.jpg'
         },
-        // role,
+        role,
     })
     //test token
      const token = user.getJwtToken();
