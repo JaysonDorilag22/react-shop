@@ -102,19 +102,70 @@ app.listen(process.env.PORT, () => {
 
 
 
-#######################################################################################
+
 12. create models folder in [backend]
 13. create product.js in [backend/models] (check product.js)
 13. create controllers folder in [backend]
 14. create productController.js in [backend/controllers] (check productController.js in repository)
 15. create routes folder in [backend]
 16. create products.js in [backend/routes] (check product.js in repository)
+17. create utils folder in [backend]
+18. create apiFeatures.js in [backend/utils] (check apiFeatures.js in repository)
+
+
+
+
 #######################################################################################
+                            INSOMNIA HTTP REQUEST LINKS
+#######################################################################################                            
+
+                                ==============                                
+                                    FILTER
+                                ==============                                    
+http://localhost:4001/api/v1/products?page=1&ratings[gte]=3&price[lte]=200&price[gte]=10
+                                
+
+                                ==============
+                                  PAGINATION
+                                ==============                                  
+            http://localhost:4001/api/v1/products?keyword=usb&page=3
 
 
+                                ==============
+                                    SEARCH
+                                ==============                                    
+                http://localhost:4001/api/v1/products?keyword=usb
 
 
+                                ==============
+                                DELETE PRODUCT
+                                ==============                                
+        http://localhost:4001/api/v1/admin/product/651e51d71efa8eb4c16a80db   
 
+
+                                ==============
+                                UPDATE PRODUCT
+                                ==============                                                             
+        http://localhost:4001/api/v1/admin/product/651e51d71efa8eb4c16a80db                                
+
+
+                                ==============
+                                SINGLE PRODUCT
+                                ==============                                
+            http://localhost:4001/api/v1/product/651e51d71efa8eb4c16a80db                                
+
+
+                                ==============
+                                 GET PRODUCTS
+                                ==============                                 
+                     http://localhost:4001/api/v1/products
+
+
+                                ==============
+                                 NEW PRODUCT
+                                ==============                                 
+                    http://localhost:4001/api/v1/product/new
+                    
 
 
 
@@ -122,6 +173,9 @@ app.listen(process.env.PORT, () => {
 
 cloudinary
 create folders avatars and products
+
+
+
 
 
 andami na sumunod di ko na nasundan
