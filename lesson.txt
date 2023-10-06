@@ -113,11 +113,98 @@ app.listen(process.env.PORT, () => {
 18. create apiFeatures.js in [backend/utils] (check apiFeatures.js in repository)
 19. create user.js in [backend/models] (check user.js in repository)
 20. create authController.js in [backend/controllers] (check authController.js in repository)
+21. create auth.js in [backend/routes] (check auth.js in repository)
 
+#######################################################################################
+                            22. link auth route in app.js
+#######################################################################################
+
+const express = require('express');
+const app = express();
+
+const products = require('./routes/product');
+const auth = require('./routes/auth');
+app.use(express.json());
+app.use('/api/v1',products);
+app.use('/api/v1', auth);
+module.exports = app;                            
 
 NOTE:
 npm uninstall bcrypt
 npm i bcryptjs
+
+
+
+23. create jwToken.js in [backend/utils] (check jwToken.js in repository)
+24. create middleware folder in [backend]
+
+
+#######################################################################################
+                     25. create auth.js in [backend/middleware]
+#######################################################################################
+const User = require('../models/user')
+const jwt = require("jsonwebtoken")
+
+exports.isAuthenticatedUser = async (req, res, next) => {
+    const { token } = req.cookies
+    //  console.log(token)
+
+     if (!token) {
+         return next(new ErrorHandler('Login first to access this resource.', 401))
+    }
+
+    if (!token) {
+        return res.status(401).json({message:'Login first to access this resource'})
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    req.user = await User.findById(decoded.id);
+    
+    next()
+};
+
+ exports.authorizeRoles = (...roles) => {
+	
+     return (req, res, next) => {
+         console.log(roles, req.user, req.body);
+         if (!roles.includes(req.user.role)) {
+             return res.status(403).json({message:`Role (${req.user.role}) is not allowed to acccess this resource`})
+             return next(
+                 new ErrorHandler(`Role (${req.user.role}) is not allowed to acccess this resource`, 403))
+         }
+         next()
+     }
+}
+
+
+
+#######################################################################################
+                     26. add cookie-parser in app.js [backend/app.js]
+#######################################################################################
+const express = require('express');
+const app = express();
+const cookie = require('cookie-parser');
+
+const products = require('./routes/product');
+const auth = require('./routes/auth');
+app.use(express.json());
+app.use(cookie());
+app.use('/api/v1',products);
+app.use('/api/v1', auth);
+module.exports = app;
+
+
+#######################################################################################
+        27. apply middleware in product.js route [backend/routes/product.js]
+#######################################################################################
+
+add this:
+const { isAuthenticatedUser,authorizeRoles} = require('../middleware/auth');
+
+change these:
+router.post('/product/new', isAuthenticatedUser, newProduct);
+router.route('/admin/product/:id', isAuthenticatedUser).put(updateProduct).delete(deleteProduct);
+
 
 
 #######################################################################################
@@ -125,57 +212,69 @@ npm i bcryptjs
 #######################################################################################                            
 
                                 ==============                                
-                                    FILTER
+                                 (GET) FILTER
                                 ==============                                    
 http://localhost:4001/api/v1/products?page=1&ratings[gte]=3&price[lte]=200&price[gte]=10
                                 
 
                                 ==============
-                                  PAGINATION
+                               (GET) PAGINATION
                                 ==============                                  
             http://localhost:4001/api/v1/products?keyword=usb&page=3
 
 
                                 ==============
-                                    SEARCH
+                                 (GET) SEARCH
                                 ==============                                    
                 http://localhost:4001/api/v1/products?keyword=usb
 
 
                                 ==============
-                                DELETE PRODUCT
+                            (DELETE) DELETE PRODUCT
                                 ==============                                
         http://localhost:4001/api/v1/admin/product/651e51d71efa8eb4c16a80db   
 
 
                                 ==============
-                                UPDATE PRODUCT
+                            (PUT) UPDATE PRODUCT
                                 ==============                                                             
         http://localhost:4001/api/v1/admin/product/651e51d71efa8eb4c16a80db                                
 
 
                                 ==============
-                                SINGLE PRODUCT
+                             (GET) SINGLE PRODUCT
                                 ==============                                
             http://localhost:4001/api/v1/product/651e51d71efa8eb4c16a80db                                
 
 
                                 ==============
-                                 GET PRODUCTS
+                              (GET) GET PRODUCTS
                                 ==============                                 
                      http://localhost:4001/api/v1/products
 
 
                                 ==============
-                                 NEW PRODUCT
+                              (POST) NEW PRODUCT
                                 ==============                                 
                     http://localhost:4001/api/v1/product/new
                     
 
+                                ==============
+                                (POST) REGISTER
+                                ==============                                 
+                    http://localhost:4001/api/v1/register
 
 
+                                ==============
+                                 (POST) LOGIN
+                                ==============                                 
+                      http://localhost:4001/api/v1/login
 
 
+                                ==============
+                                 (POST) LOGOUT
+                                ==============                                 
+                      http://localhost:4001/api/v1/logout
 cloudinary
 create folders avatars and products
 

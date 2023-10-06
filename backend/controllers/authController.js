@@ -1,5 +1,5 @@
 const User = require('../models/user');
-// const sendToken = require('../utils/jwtToken');
+const sendToken = require('../utils/jwToken');
 
 // const ErrorHandler = require('../utils/errorHandler');
 
@@ -23,60 +23,60 @@ exports.registerUser = async (req, res, next) => {
       	user,
      	token
       })
-    // sendToken(user, 200, res)
+    sendToken(user, 200, res)
 }
 
-// exports.loginUser = async (req, res, next) => {
-//     const { email, password } = req.body;
+exports.loginUser = async (req, res, next) => {
+    const { email, password } = req.body;
 
-//     // Checks if email and password is entered by user
-//     if (!email || !password) {
-//         return res.status(400).json({ error: 'Please enter email & password' })
-//     }
-//     // if (!email || !password) {
-//     //     return next(new ErrorHandler('Please enter email & password', 400))
-//     // }
+    // Checks if email and password is entered by user
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Please enter email & password' })
+    }
+    // if (!email || !password) {
+    //     return next(new ErrorHandler('Please enter email & password', 400))
+    // }
 
-//     // Finding user in database
-//     const user = await User.findOne({ email }).select('+password')
+    // Finding user in database
+    const user = await User.findOne({ email }).select('+password')
 
-//     if (!user) {
-//         return res.status(401).json({ message: 'Invalid Email or Password' })
-//     }
-//     // if (!user) {
-//     //     return next(new ErrorHandler('Invalid Email or Password', 401));
-//     // }
+    if (!user) {
+        return res.status(401).json({ message: 'Invalid Email or Password' })
+    }
+    // if (!user) {
+    //     return next(new ErrorHandler('Invalid Email or Password', 401));
+    // }
 
-//     // Checks if password is correct or not
-//     const isPasswordMatched = await user.comparePassword(password);
+    // Checks if password is correct or not
+    const isPasswordMatched = await user.comparePassword(password);
 
-//     // if (!isPasswordMatched) {
-//     //     return next(new ErrorHandler('Invalid Email or Password', 401));
-//     // }
-//     if (!isPasswordMatched) {
-//         return res.status(401).json({ message: 'Invalid Email or Password' })
-//     }
-//     // const token = user.getJwtToken();
+    // if (!isPasswordMatched) {
+    //     return next(new ErrorHandler('Invalid Email or Password', 401));
+    // }
+    if (!isPasswordMatched) {
+        return res.status(401).json({ message: 'Invalid Email or Password' })
+    }
+    // const token = user.getJwtToken();
 
-//     //  res.status(201).json({
-//     //  	success:true,
+    //  res.status(201).json({
+    //  	success:true,
 
-//     //  	token
-//     //  });
-//     sendToken(user, 200, res)
-// }
+    //  	token
+    //  });
+    sendToken(user, 200, res)
+}
 
-// exports.logout = async (req, res, next) => {
-//     res.cookie('token', null, {
-//         expires: new Date(Date.now()),
-//         httpOnly: true
-//     })
+exports.logout = async (req, res, next) => {
+    res.cookie('token', null, {
+        expires: new Date(Date.now()),
+        httpOnly: true
+    })
 
-//     res.status(200).json({
-//         success: true,
-//         message: 'Logged out'
-//     })
-// }
+    res.status(200).json({
+        success: true,
+        message: 'Logged out'
+    })
+}
 
 // exports.forgotPassword = async (req, res, next) => {
 //     const user = await User.findOne({ email: req.body.email });

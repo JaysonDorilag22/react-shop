@@ -56,9 +56,9 @@ userSchema.methods.getJwtToken = function () {
     });
 }
 
-// userSchema.methods.comparePassword = async function (enteredPassword) {
-//     return await bcrypt.compare(enteredPassword, this.password)
-// }
+userSchema.methods.comparePassword = async function (enteredPassword) {
+    return await bcrypt.compare(enteredPassword, this.password)
+}
 
 // userSchema.methods.getResetPasswordToken = function () {
 //     // Generate token
