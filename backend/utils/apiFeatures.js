@@ -10,7 +10,8 @@ class APIFeatures {
             name: {
                 $regex: this.queryStr.keyword,
                 $options: 'i'
-            }
+            },
+            
         } : {}
         console.log(this.queryStr);
         this.query = this.query.find({ ...keyword });

@@ -205,6 +205,126 @@ change these:
 router.post('/product/new', isAuthenticatedUser, newProduct);
 router.route('/admin/product/:id', isAuthenticatedUser).put(updateProduct).delete(deleteProduct);
 
+#######################################################################################
+                    28. User model (getResetPasswordToken method)
+#######################################################################################
+userSchema.methods.getResetPasswordToken = function () {
+    // Generate token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+
+    // Hash and set to resetPasswordToken
+    this.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex')
+
+    // Set token expire time
+    this.resetPasswordExpire = Date.now() + 30 * 60 * 1000
+
+    return resetToken
+
+}
+#######################################################################################
+                        29. Authcontroller (forgotPassword method)
+#######################################################################################
+exports.forgotPassword = async (req, res, next) => {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found with this email' })
+        // return next(new ErrorHandler('User not found with this email', 404));
+    }
+    // Get reset token
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+    // Create reset password url
+    const resetUrl = `${req.protocol}://${req.get('host')}/password/reset/${resetToken}`;
+    const message = `Your password reset token is as follow:\n\n${resetUrl}\n\nIf you have not requested this email, then ignore it.`
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'ShopIT Password Recovery',
+            message
+        })
+
+        res.status(200).json({
+            success: true,
+            message: `Email sent to: ${user.email}`
+        })
+
+    } catch (error) {
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpire = undefined;
+        await user.save({ validateBeforeSave: false });
+        return res.status(500).json({ error: error.message })
+        // return next(new ErrorHandler(error.message, 500))
+    }
+}
+
+#######################################################################################
+                        30. Authcontroller (resetPassword method)
+#######################################################################################
+exports.resetPassword = async (req, res, next) => {
+    // Hash URL token
+    const resetPasswordToken = crypto.createHash('sha256').update(req.params.token).digest('hex')
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
+    })
+
+    if (!user) {
+        return res.status(400).json({ message: 'Password reset token is invalid or has been expired' })
+        // return next(new ErrorHandler('Password reset token is invalid or has been expired', 400))
+    }
+
+    if (req.body.password !== req.body.confirmPassword) {
+        return res.status(400).json({ message: 'Password does not match' })
+        // return next(new ErrorHandler('Password does not match', 400))
+    }
+
+    // Setup new password
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+    sendToken(user, 200, res);
+}
+
+#######################################################################################
+                        31. Authcontroller (UpdatePassword method)
+#######################################################################################
+exports.updatePassword = async (req, res, next) => {
+    const user = await User.findById(req.user.id).select('password');
+    // Check previous user password
+    const isMatched = await user.comparePassword(req.body.oldPassword)
+    if (!isMatched) {
+        return res.status(400).json({ message: 'Old password is incorrect' })
+    }
+    user.password = req.body.password;
+    await user.save();
+    sendToken(user, 200, res)
+
+}
+
+#######################################################################################
+                        32. Update [routes/auth.js]
+#######################################################################################
+const express = require('express');
+const router = express.Router();
+
+const {registerUser, loginUser, logout, forgotPassword, resetPassword, getUserProfile, updatePassword} = require('../controllers/authController');
+const { isAuthenticatedUser,authorizeRoles} = require('../middleware/auth');
+
+
+router.post('/register',registerUser);
+router.post('/login', loginUser);
+router.get('/logout', logout);
+router.post('/password/forgot', forgotPassword);
+router.put('/password/reset/:token', resetPassword);
+router.get('/me', isAuthenticatedUser, getUserProfile);
+router.put('/password/update', isAuthenticatedUser, updatePassword);
+module.exports = router;
+
+
+33. Create order model in [backend/models].
+34. Create orderController in [backend/controllers].
+35. Create order route in [backend/routes]
 
 
 #######################################################################################
@@ -275,9 +395,41 @@ http://localhost:4001/api/v1/products?page=1&ratings[gte]=3&price[lte]=200&price
                                  (POST) LOGOUT
                                 ==============                                 
                       http://localhost:4001/api/v1/logout
+
+
+                                ==============
+                            (POST) FORGOT PASSWORD
+                                ============== 
+                    http://localhost:4001/api/v1/password/forgot  
+
+
+                                ==============
+                            (POST) RESET PASSWORD
+                                ============== 
+                 http://localhost:4001/api/v1/password/reset/:token
+
+
+                                ==============
+                            (POST) UPDATE PASSWORD
+                                ============== 
+                   http://localhost:4001/api/v1/password/update
+                          (log in first, then copy token)  
+                  (set body to JSON, then set auth to Bearer Token)  
+                        (Paste Token and set Prefix to 'Bearer')  
+
+
+
+
+
+
 cloudinary
 create folders avatars and products
 
 
 
 andami na sumunod di ko na nasundan
+
+FRONT END SUNDAN NIYO NALANG SA GITHUB :)
+
+JK TO NA NGA
+
